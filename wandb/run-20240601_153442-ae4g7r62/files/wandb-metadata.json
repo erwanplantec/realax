@@ -1,0 +1,48 @@
+{
+    "os": "macOS-14.4.1-arm64-arm-64bit",
+    "python": "3.12.3",
+    "heartbeatAt": "2024-06-01T13:34:43.048016",
+    "startedAt": "2024-06-01T13:34:42.080680",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "-m examples.es_brax",
+    "codePathLocal": null,
+    "git": {
+        "remote": "git@github.com:erwanplantec/realax.git",
+        "commit": "c06d309c8d162582ad7a37e54989db8fd87cde44"
+    },
+    "email": "eplantec@hotmail.fr",
+    "root": "/Users/erpl/Library/CloudStorage/OneDrive-ITU/Documents/Grow-AI/realax",
+    "host": "mac623827 ",
+    "username": "erpl",
+    "executable": "/Users/erpl/anaconda3/envs/realax/bin/python",
+    "cpu_count": 10,
+    "cpu_count_logical": 10,
+    "cpu_freq": {
+        "current": 3504,
+        "min": 702,
+        "max": 3504
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3504,
+            "min": 702,
+            "max": 3504
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 926.3517189025879,
+            "used": 12.541637420654297
+        }
+    },
+    "gpuapple": {
+        "type": "Apple M2 Pro",
+        "vendor": "sppci_vendor_Apple"
+    },
+    "memory": {
+        "total": 16.0
+    }
+}
