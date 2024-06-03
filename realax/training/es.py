@@ -96,7 +96,7 @@ class EvosaxTrainer(BaseTrainer):
 		
 		if isinstance(strategy, str):
 			assert popsize is not None
-			self.strategy = self.create_strategy(strategy, popsize, params_shaper.total_params, **es_kws) # type: ignore
+			self.strategy = self.create_strategy(strategy, popsize, self.params_shaper.total_params, **es_kws) # type: ignore
 		else:
 			self.strategy = strategy
 
