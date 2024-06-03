@@ -105,7 +105,7 @@ trainer = rx.OptaxTrainer(
 	optimizer="adamw",
 	initializer=initializer,
 	loss_fn=rastrigin,
-    learning_rate=1e-3
+	learning_rate=1e-3
 )
 
 # 4. Optimize params
@@ -128,8 +128,9 @@ params, final_state, data = rx.optimize(
 
 # Tasks
 
-realax provides some wrappers for rl environemnts for them to be used with realax trainers. SO far we have wrappers for gymnax evnsironments with `GymnaxTask` and brax envs with `BraxTask`.
-An example optimizing an mlp in a brax environment is given in the logging section.
+realax provides some wrappers for rl environments for them to be used with realax trainers. So far we have wrappers for gymnax evnironments with `GymnaxTask` and brax envs with `BraxTask`.
+An example optimizing an mlp in a brax environment is given in the logging section. As fot trainers,, envs to be used can be specified with as tring corresponfing to one of brax/gymnax envs. However, an instance of an environment can also be passed so one can easily use custom environments following obe of brax or gymnax apis.
+Policies to be optimized on these tasks should inherit from `realax.tasks.rl_policy.BasePolicy` (or at least implement the `__call__` and `initialize` methods with the same signatures).
 
 # Logging
 
