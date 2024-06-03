@@ -27,7 +27,7 @@ realax implements few wrappers allowing to optimize your models w.r.t to some ta
 
 ## ES
 
-realax implements wrappers around evosax managing trinaing loops and data collection in an optimized way (scanned loops...). realax also supports multi device parrellization, you jjst have to pass the number of device the trainer should use and that's it (user should make sure the population size is actially divisible by the number of devices).
+realax implements wrappers around evosax managing training loops and data collection in an optimized way (scanned loops...). realax also supports multi device parrellization, you jjst have to pass the number of device the trainer should use and that's it (user should make sure the population size is actially divisible by the number of devices).
 
 ```python
 import realax as rx

@@ -205,7 +205,7 @@ class EvosaxTrainer(BaseTrainer):
 		devices = mesh_utils.create_device_mesh((self.n_devices,))
 		device_mesh = Mesh(devices, axis_names=("p"))
 
-		_eval = lambda x, k: self.task(self.params_shaper.reshape_single(x), k)
+		_eval = lambda x, k, d: self.task(self.params_shaper.reshape_single(x), k, d)
 		batch_eval = jax.vmap(_eval, in_axes=(0,None,None))
 		sheval = shmap(batch_eval, 
 					   mesh=device_mesh, 
