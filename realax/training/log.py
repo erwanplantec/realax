@@ -21,6 +21,14 @@ def default_es_metrics(state, data):
 	ckpt_data = state.mean
 	return log_data, ckpt_data, gen
 
+def default_grad_metrics(state, data):
+	ckpt_data = state.params
+	epoch = state.epoch
+	log_data = data["loss"]
+	return log_data, ckpt_data, epoch
+
+
+
 class Logger:
 
 	#-------------------------------------------------------------------

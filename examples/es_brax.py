@@ -7,9 +7,8 @@ from jaxtyping import PyTree
 import evosax as ex
 import matplotlib.pyplot as plt
 
-from realax.tasks import BraxTask, ENV_SPACES
-from realax.training.es import evolve
-from realax.training.log import Logger, default_es_metrics
+import realax as rx
+from realax.tasks import ENV_SPACES
 
 class MLPPolicy(eqx.Module):
 	#-------------------------------------------------------------------
@@ -41,12 +40,12 @@ policy = MLPPolicy(obs_dims, action_dims, key=jr.key(1))
 params, statics = eqx.partition(policy, eqx.is_array)
 mdl_factory = lambda prms: eqx.combine(prms, statics)
 
-task = BraxTask(env_name, 500, mdl_factory)
+task = rx.BraxTask(env_name, 500, mdl_factory)
 
-logger = Logger(wandb_log=True, metrics_fn=default_es_metrics, 
-	ckpt_file="../ckpts_ex/es", ckpt_freq=10)
+logger = rx.Logger(wandb_log=True, metrics_fn=rx.training.log.default_es_metrics, 
+	ckpt_file="../ckpts_ex/es", ckpt_freq=50)
 
-logger.init("es_brax_example", config={"env":"reacher"})
+logger.init(project="es_brax_example", config={"env":"reacher"})
 evolved_policy, state=evolve(										#type:ignore
 	params, 
 	task, 

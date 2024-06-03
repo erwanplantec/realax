@@ -1,5 +1,6 @@
-from .brax import BraxTask
-from .gymnax import GymnaxTask
+from .brax_wrapper import BraxTask
+from .gymnax_wrapper import GymnaxTask
+from .rl_policy import BasePolicy
 
 ENV_SPACES = {
 	"CartPole-v1": (4, 2, "discrete"),

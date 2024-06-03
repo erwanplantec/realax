@@ -109,7 +109,7 @@ class OptaxTrainer(BaseTrainer):
 		bl = jnp.where(is_best, loss, state.best_loss)
 		bp = jax.tree_map(lambda p, bp: jnp.where(is_best, p, bp), state.params, state.best_params)
 		return (TrainState(params=params, opt_state=opt_state, epoch=state.epoch+1, best_params=bp, best_loss=bl), 
-				{"loss": loss, "data": eval_data})
+				{"loss": loss, "eval_data": eval_data})
 
 	#-------------------------------------------------------------------
 

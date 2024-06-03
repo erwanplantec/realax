@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["realax","realax.training","realax.tasks"]
+
+[project]
+name = "realax"
+version = "0.0.1"
+authors = [
+  { name="Erwan plantec", email="erpl@itu.dk" },
+]
+description = "Real lab jax utils"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/erwanplantec/realax"
