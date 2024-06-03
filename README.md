@@ -1,11 +1,33 @@
-# realax
-Set of wrappers and utilities for JAX in the context of ML/ES/RL.
+# Realax
+Set of wrappers and utilities for RL / evolutionary optimization / gradient optimization in JAX.
+
+# Install
+
+to install just clone the repo and then:
+
+```
+cd realax
+python -m build
+pip install dist/realax-0.0.2-py3-none-any.whl
+```
+
+Requirments are not handled by the package so far. It has been tested with JAX 0.4.28 (when installing jax , make sure that the PJRT plugin is not installed or remove it). 
+Realax depends on the following libraries (you can install last versions for all, seem to work):
+1. evosax
+2. optax
+3. gymnax
+4. brax
+5. tqdm
+6. wandb
+
 
 # Training
 
-realax implements few wrappersallowing to optimize your models w.r.t to some tasks (i.e fitness/loss function) in a few lines.
+realax implements few wrappers allowing to optimize your models w.r.t to some tasks (i.e fitness/loss function) in a few lines and manage logging data to wandb while taking advantage of JAX acceleration.  
 
 ## ES
+
+realax implements wrappers around evosax managing trinaing loops and data collection in an optimized way (scanned loops...). realax also supports multi device parrellization, you jjst have to pass the number of device the trainer should use and that's it (user should make sure the population size is actially divisible by the number of devices).
 
 ```python
 import realax as rx
@@ -92,9 +114,9 @@ final_state, data = trainer.init_and_train(jr.key(2)) #type:ignore
 losses = data["metrics"]["loss"]
 ```
 
-As for ES, anyb optimizer supported by optax can be passed to the trainer as a string but it can also manage any optimizer following the optax API by passing an instance of it instead of a string.
+As with ES, any optimizer supported by optax can be passed to the trainer as a string but it can also manage any optimizer following the optax API by passing an instance of it instead of a string.
 
-and as with ES we have a shorter function allowing to do the same trianing
+and as with ES we have a shorter function allowing to do the same training
 ```python
 params, final_state, data = rx.optimize(
 	initializer(jr.key(1)),
@@ -106,7 +128,8 @@ params, final_state, data = rx.optimize(
 
 # Tasks
 
-realax provides some wrappers for rl environemnts for them to be used with realax trainers. SO far we have wrappers for gymnax evnsironments with `GymnaxTask` and brax envs with `BraxTask`
+realax provides some wrappers for rl environemnts for them to be used with realax trainers. SO far we have wrappers for gymnax evnsironments with `GymnaxTask` and brax envs with `BraxTask`.
+An example optimizing an mlp in a brax environment is given in the logging section.
 
 # Logging
 
@@ -125,11 +148,16 @@ policy = rx.tasks.rl_policy.MLPPolicy(obs_dims, action_dims, mlp_width, mlp_dept
 params, statics = eqx.partition(policy, eqx.is_array)
 mdl_factory = lambda prms: eqx.combine(prms, statics)
 
-task = rx.BraxTask(env_name, 500, mdl_factory)
+task = rx.BraxTask(
+	env_name, 
+	500, # max number of env steps
+	mdl_factory, #function taking as input parameters and returning the model
+	data_fn=lambda x:x, 
+)
 
 logger = rx.Logger(
-	wandb_log=True, 
-	metrics_fn=rx.training.log.default_es_metrics, # will log min, max and mean firness and ckpt current es mean. 
+	wandb_log=True, # if data should be logged to wandb
+	metrics_fn=rx.training.log.default_es_metrics, # will log min, max and mean firness and ckpt current es mean
 	ckpt_file="../ckpts_ex/es", 
 	ckpt_freq=50)
 
@@ -154,5 +182,10 @@ evolved_policy, state = rx.evolve(										#type:ignore
 )
 logger.finish()
 ```
+
+# TODO:
+- utilities for easily using non-jittable functions (uncompiled training/env loops, callback utilities)
+- Jumanji wrapper
+- Fix the data collection issues for brax tasks
 
 
