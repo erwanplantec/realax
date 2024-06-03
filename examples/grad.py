@@ -1,4 +1,4 @@
-from realax.training.grad import optimize
+import realax as rx
 
 import jax.numpy as jnp
 import jax.random as jr
@@ -13,13 +13,21 @@ def rastrigin(x, key=None, data=None):
 	y = A*n + jnp.sum(jnp.square(x) - A*jnp.cos(2*jnp.pi*x))
 	return y, dict()
 
-# 2. Set your model parameters
-prms = jr.normal(jr.key(1), (2,))
+# 2. Set your model constructor
+initializer = lambda key:  jr.normal(key, (2,))
 
-# 3. Optimize params
-prms, _, data = optimize(prms, rastrigin, jr.key(1), steps=128) #type:ignore
+# 3. Instamtiate trainer
+trainer = rx.OptaxTrainer(
+	epochs=64,
+	optimizer="adamw",
+	initializer=initializer,
+	loss_fn=rastrigin
+)
+
+# 4. Optimize params
+final_state, data = trainer.init_and_train(prms, rastrigin, jr.key(1), steps=128) #type:ignore
 
 # 4. Plot results
 plt.plot(data["metrics"]["loss"])
-plt.title(f"$x^*=${np.array(prms)}")
+plt.title(f"$x^*=${np.array(final_state.params)}")
 plt.show()
