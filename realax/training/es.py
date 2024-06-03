@@ -87,6 +87,12 @@ class EvosaxTrainer(BaseTrainer):
 		super().__init__(train_steps=train_steps, 
 						 logger=logger, 
 						 progress_bar=progress_bar)
+
+		if params_like is None:
+			assert params_shaper is not None, "one of params_like or params_shaper must be given"
+			self.params_shaper = params_shaper
+		else:
+			self.params_shaper = ex.ParameterReshaper(params_like)
 		
 		if isinstance(strategy, str):
 			assert popsize is not None
@@ -98,12 +104,6 @@ class EvosaxTrainer(BaseTrainer):
 			self.es_params = self.strategy.default_params
 		else:
 			self.es_params = es_params
-
-		if params_like is None:
-			assert params_shaper is not None, "one of params_like or params_shaper must be given"
-			self.params_shaper = params_shaper
-		else:
-			self.params_shaper = ex.ParameterReshaper(params_like)
 
 		if eval_reps > 1:
 			def _eval_fn(p: Params, k: jax.Array, tp: Optional[PyTree]=None):

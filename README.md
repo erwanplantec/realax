@@ -9,6 +9,8 @@ realax implements few wrappersallowing to optimize your models w.r.t to some tas
 
 ```python
 import realax as rx
+import evosax as ex
+import jax.random as jr
 
 # 1. define your fitness function
 def rastrigin(x, key=None, data=None):
@@ -22,9 +24,22 @@ def rastrigin(x, key=None, data=None):
 dims = 2
 prms = jnp.zeros((dims,))
 
+# 3. Instantiate your trainer
+trainer = rx.Evosaxtrainer(
+	train_steps=32, # number of training steps
+	strategy="CMA_ES", #srategy to use: either a string corresponfing to one of evosax implemented strategy or a strategy following evosax API
+	task=rastrigin,
+	params_like=prms,  # structure of parameters (value is not used)	
+	fitness_shaper=ex.FitnessShaper(maximize=False), #set to true if score should be maximized
+	popsize=32,  # es population size
+	eval_reps=1, # number of evaluation per indiviual (results are averages to get the individual fitness)
+	n_devices=1. # number of devices to parallelize training over
+)
+
 # 3. Run es
-evolved_prms, _, data = rx.evolve(prms, rastrigin, jr.key(1), steps=32)
+final_es_state, data = trainer.init_and_train(jr.key(1))
 ```
+
 
 ## Grad
 
