@@ -7,7 +7,7 @@ packages = ["realax","realax.training","realax.tasks"]
 
 [project]
 name = "realax"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Erwan plantec", email="erpl@itu.dk" },
 ]

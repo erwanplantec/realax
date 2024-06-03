@@ -191,7 +191,7 @@ class EvosaxTrainer(BaseTrainer):
 
 	#-------------------------------------------------------------------
 
-	def _eval_shmap(self, x: jax.Array, key: jax.Array, task_params: PyTree)->Tuple[jax.Array, PyTree]:
+	def _eval_shmap(self, x: jax.Array, key: jax.Array, data: Data)->Tuple[jax.Array, PyTree]:
 		"""Summary
 		
 		Args:
@@ -206,14 +206,14 @@ class EvosaxTrainer(BaseTrainer):
 		device_mesh = Mesh(devices, axis_names=("p"))
 
 		_eval = lambda x, k: self.task(self.params_shaper.reshape_single(x), k)
-		batch_eval = jax.vmap(_eval, in_axes=(0,None))
+		batch_eval = jax.vmap(_eval, in_axes=(0,None,None))
 		sheval = shmap(batch_eval, 
 					   mesh=device_mesh, 
-					   in_specs=(P("p",), P()),
+					   in_specs=(P("p",), P(), P()),
 					   out_specs=(P("p"), P("p")),
 					   check_rep=False)
 
-		return sheval(x, key)
+		return sheval(x, key, data)
 
 	#-------------------------------------------------------------------
 
