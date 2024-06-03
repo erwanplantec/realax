@@ -7,7 +7,7 @@ realax implements few wrappersallowing to optimize your models w.r.t to some tas
 
 ## ES
 
-'''python
+```python
 import realax as rx
 
 # 1. define your fitness function
@@ -24,7 +24,7 @@ prms = jnp.zeros((dims,))
 
 # 3. Run es
 evolved_prms, _, data = rx.evolve(prms, rastrigin, jr.key(1), steps=32)
-'''
+```
 
 ## Grad
 
