@@ -1,7 +1,10 @@
+"""Summary
+"""
 from ctypes import Union
 from typing import Callable, TypeAlias, Tuple, Optional, NamedTuple
 
 import jax
+from jax.nn import initializers
 import jax.random as jr
 import jax
 import jax.numpy as jnp
@@ -22,11 +25,27 @@ RandomKey: TypeAlias = jax.Array
 QDTask: TypeAlias = Callable[[Params, RandomKey, Optional[Data]], Tuple[Float, Float, Data]]
 
 class QDState(NamedTuple):
+
+	"""Summary
+	"""
+	
 	repertoire: MapElitesRepertoire
-	emitter_state: EmitterState
+	emitter_state: EmitterState | None
 
 
 class QDTrainer(BaseTrainer):
+
+	"""Summary
+	
+	Attributes:
+	    centroids (TYPE): Description
+	    emitter (TYPE): Description
+	    fitness_shaper (TYPE): Description
+	    n_devices (TYPE): Description
+	    params_shaper (TYPE): Description
+	    task (TYPE): Description
+	"""
+	
 	#-------------------------------------------------------------------
 	emitter: Emitter
 	task : QDTask
@@ -51,7 +70,23 @@ class QDTrainer(BaseTrainer):
 		logger: Optional[Logger] = None, 
 		progress_bar: Optional[bool] = False,
 		n_devices: int=1):
-
+		"""Summary
+		
+		Args:
+		    emitter (Emitter): Description
+		    task (QDTask): Description
+		    train_steps (int): Description
+		    params_like (Optional[Params], optional): Description
+		    param_shaper (Optional[ex.ParameterReshaper], optional): Description
+		    grid_shape (Optional[tuple[int]], optional): Description
+		    bd_minval (Float, optional): Description
+		    bd_maxval (Float, optional): Description
+		    centroids (Optional[jax.Array], optional): Description
+		    fitness_shaper (ex.FitnessShaper, optional): Description
+		    logger (Optional[Logger], optional): Description
+		    progress_bar (Optional[bool], optional): Description
+		    n_devices (int, optional): Description
+		"""
 		super().__init__(train_steps, logger, progress_bar)
 
 		if params_like is None:
@@ -75,7 +110,16 @@ class QDTrainer(BaseTrainer):
 	#-------------------------------------------------------------------
 
 	def train_step(self, state: QDState, key: RandomKey, data: Optional[Data] = None) -> Tuple[QDState, Data]:
+		"""Summary
 		
+		Args:
+		    state (QDState): Description
+		    key (RandomKey): Description
+		    data (Optional[Data], optional): Description
+		
+		Returns:
+		    Tuple[QDState, Data]: Description
+		"""
 		kemit, keval = jr.split(key, 2)
 		x, _ = self.emitter.emit(state.repertoire, state.emitter_state, kemit)
 		fitness, bd, eval_data = self.eval(x, keval, data) 
@@ -97,7 +141,21 @@ class QDTrainer(BaseTrainer):
 	#-------------------------------------------------------------------
 
 	def initialize(self, key: jax.Array) -> QDState:
-		return super().initialize(key)
+		"""Summary
+		
+		Args:
+		    key (jax.Array): Description
+		
+		Returns:
+		    QDState: Description
+		"""
+		kemit, krep, keval = jr.split(key,3)
+		#init_genotypes = jnp.zeros((self.emitter.batch_size,self.params_shaper.total_params))
+		init_genotypes = jr.normal(krep, (self.emitter.batch_size,self.params_shaper.total_params))
+		fit, bd, eval_data = self.eval(init_genotypes, keval, None)
+		emitter_state, _ = self.emitter.init(None, kemit)
+		repertoire = MapElitesRepertoire.init(init_genotypes, fit, bd, self.centroids)
+		return QDState(repertoire=repertoire, emitter_state=emitter_state)
 
 	#-------------------------------------------------------------------
 
@@ -110,9 +168,6 @@ class QDTrainer(BaseTrainer):
 		
 		Returns:
 		    TYPE: Description
-		
-		No Longer Raises:
-		    ValueError: Description
 		"""
 		if self.n_devices == 1:
 			return self._eval(*args, **kwargs)
@@ -131,9 +186,6 @@ class QDTrainer(BaseTrainer):
 		
 		Returns:
 		    Tuple[jax.Array, PyTree]: Description
-		
-		Deleted Parameters:
-		    task_params (PyTree): Description
 		"""
 		params = self.params_shaper.reshape(x)
 		_eval = jax.vmap(self.task, in_axes=(0, 0, None))
@@ -147,7 +199,7 @@ class QDTrainer(BaseTrainer):
 		Args:
 		    x (jax.Array): Description
 		    key (jax.Array): Description
-		    task_params (PyTree): Description
+		    data (Data): Description
 		
 		Returns:
 		    Tuple[jax.Array, PyTree]: Description
