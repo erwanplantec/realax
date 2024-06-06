@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["realax","realax.training","realax.tasks"]
+packages = ["realax","realax.training","realax.tasks","relax.logging"]
 
 [project]
 name = "realax"

@@ -17,12 +17,19 @@ from .base import BaseTrainer
 from ..training.log import Logger
 
 from qdax.core.emitters.emitter import Emitter, EmitterState
+from qdax.core.emitters.cma_improvement_emitter import CMAImprovementEmitter
+from qdax.core.emitters.cma_opt_emitter import CMAOptimizingEmitter
 from qdax.core.containers.mapelites_repertoire import MapElitesRepertoire, compute_euclidean_centroids
 
 Params: TypeAlias = PyTree
 Data: TypeAlias = PyTree
 RandomKey: TypeAlias = jax.Array
 QDTask: TypeAlias = Callable[[Params, RandomKey, Optional[Data]], Tuple[Float, Float, Data]]
+
+emitters = {
+	"cma_me": CMAImprovementEmitter,
+	"cma_me_opt": CMAOptimizingEmitter
+}
 
 class QDState(NamedTuple):
 

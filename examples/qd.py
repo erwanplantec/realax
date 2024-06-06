@@ -1,10 +1,8 @@
-import jax
 import jax.numpy as jnp
 import jax.random as jr
-import jax.nn as jnn
 import realax as rx
 import matplotlib.pyplot as plt
-from qdax.core.emitters.cma_opt_emitter import CMAOptimizingEmitter
+
 from qdax.core.emitters.cma_improvement_emitter import CMAImprovementEmitter
 from qdax.core.emitters.cma_pool_emitter import CMAPoolEmitter
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
@@ -19,7 +17,6 @@ def rastrigin(x, key=None, data=None):
 
 
 centroids = compute_euclidean_centroids((16,16), minval=-1., maxval=1.)
-#emitter = CMAOptimizingEmitter(64, 2, centroids, 0.1)
 emitter = CMAImprovementEmitter(64, 2, centroids, 0.1)
 emitter = CMAPoolEmitter(16, emitter)
 

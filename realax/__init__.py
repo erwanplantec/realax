@@ -3,6 +3,6 @@ from .training import (
 	optimize, 
 	EvosaxTrainer, 
 	OptaxTrainer, 
-	Logger, 
 	QDTrainer)
+from .logging import Logger
 from .tasks import GymnaxTask, BraxTask
