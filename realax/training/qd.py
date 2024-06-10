@@ -74,6 +74,7 @@ class QDTrainer(BaseTrainer):
 		bd_maxval: Float=1.,
 		centroids: Optional[jax.Array]=None,
 		fitness_shaper: ex.FitnessShaper=ex.FitnessShaper(),
+		eval_reps: int=1,
 		logger: Optional[Logger] = None, 
 		progress_bar: Optional[bool] = False,
 		n_devices: int=1):
@@ -110,7 +111,13 @@ class QDTrainer(BaseTrainer):
 
 
 		self.emitter = emitter
-		self.task = task
+		if eval_reps > 1:
+			def _eval_fn(p: Params, k: jax.Array, tp: Optional[PyTree]=None):
+				fit, bd, info = jax.vmap(task, in_axes=(None,0,None))(p, jr.split(k,eval_reps), tp)
+				return jnp.mean(fit), jnp.mean(bd,axis=0), info
+			self.task = _eval_fn
+		else :
+			self.task = task
 		self.n_devices = n_devices
 		self.fitness_shaper = fitness_shaper
 

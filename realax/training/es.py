@@ -107,15 +107,6 @@ class EvosaxTrainer(BaseTrainer):
 
 		if eval_reps > 1:
 			def _eval_fn(p: Params, k: jax.Array, tp: Optional[PyTree]=None):
-				"""
-				Args:
-				    p (Params): Description
-				    k (jax.Array): Description
-				    tp (Optional[PyTree], optional): Description
-				
-				Returns:
-				    TYPE: Description
-				"""
 				fit, info = jax.vmap(task, in_axes=(None,0,None))(p, jr.split(k,eval_reps), tp)
 				return jnp.mean(fit), info
 			self.task = _eval_fn
