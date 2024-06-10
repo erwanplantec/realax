@@ -3,9 +3,9 @@ import jax
 import jax.numpy as jnp
 from jaxtyping import PyTree
 from typing import Tuple, TypeAlias, Callable, Optional
-from jax.experimental import host_callback as hcb
 import equinox as eqx
 import os
+from jax.experimental import host_callback as hcb
 
 TrainState: TypeAlias = PyTree[...]
 Data: TypeAlias = PyTree[...]

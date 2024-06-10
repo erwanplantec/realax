@@ -4,9 +4,8 @@ Attributes:
     Data (TYPE): Description
     Params (TYPE): Description
 """
-from evosax.core import optimizer
 from .base import BaseTrainer
-from .log import Logger
+from ..logging import Logger
 
 import jax
 import jax.numpy as jnp

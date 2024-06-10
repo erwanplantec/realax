@@ -7,7 +7,7 @@ Deleted Attributes:
     TaskParams (TYPE): Description
     TrainState (TYPE): Description
 """
-from .log import Logger
+from ..logging import Logger
 from .base import BaseTrainer
 
 import jax

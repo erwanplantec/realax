@@ -4,7 +4,7 @@
 # providing data ate each trainign step
 
 from .utils import progress_bar_scan, progress_bar_fori
-from .log import Logger
+from ..logging import Logger
 
 import jax
 import jax.numpy as jnp

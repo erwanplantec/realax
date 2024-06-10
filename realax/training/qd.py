@@ -14,7 +14,7 @@ from jax.experimental import mesh_utils
 from jaxtyping import Float, PyTree
 import evosax as ex
 from .base import BaseTrainer
-from ..training.log import Logger
+from ..logging import Logger
 
 from qdax.core.emitters.emitter import Emitter, EmitterState
 from qdax.core.emitters.cma_improvement_emitter import CMAImprovementEmitter
