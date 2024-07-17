@@ -16,10 +16,12 @@ import evosax as ex
 from .base import BaseTrainer
 from ..logging import Logger
 
+
 from qdax.core.emitters.emitter import Emitter, EmitterState
 from qdax.core.emitters.cma_improvement_emitter import CMAImprovementEmitter
 from qdax.core.emitters.cma_opt_emitter import CMAOptimizingEmitter
 from qdax.core.containers.mapelites_repertoire import MapElitesRepertoire, compute_euclidean_centroids
+
 
 Params: TypeAlias = PyTree
 Data: TypeAlias = PyTree
@@ -35,7 +37,6 @@ class QDState(NamedTuple):
 
 	"""Summary
 	"""
-	
 	repertoire: MapElitesRepertoire
 	emitter_state: EmitterState | None
 

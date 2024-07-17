@@ -1,4 +1,5 @@
 from typing import Callable, Optional, Tuple, TypeAlias
+from gymnax.environments.environment import Environment
 import jax
 import jax.numpy as jnp
 import jax.random as jr
@@ -28,13 +29,17 @@ class GymnaxTask(eqx.Module):
 
 	def __init__(
 		self, 
-		env: str,
+		env: str | Environment,
 		model_factory: Callable=lambda prms: prms,
 		env_params: Optional[PyTree] = None,
 		data_fn: Callable=lambda d: d):
 
 		self.model_factory = model_factory
-		self.env, default_env_params = gymnax.make(env) #type: ignore
+		if isinstance(env, str):
+			self.env, default_env_params = gymnax.make(env) #type: ignore
+		else:
+			self.env = env
+			default_env_params = None
 		self.env_params = env_params if env_params is not None else default_env_params 
 		self.data_fn = data_fn
 
