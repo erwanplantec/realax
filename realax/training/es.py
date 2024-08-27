@@ -63,7 +63,7 @@ class EvosaxTrainer(BaseTrainer):
 		es_params: Optional[ex.EvoParams]=None,
 		eval_reps: int=1,
 		logger: Optional[Logger]=None,
-	    progress_bar: Optional[bool]=True,
+	    progress_bar: Optional[bool]=False,
 	    n_devices: int=1):
 		"""Summary
 		

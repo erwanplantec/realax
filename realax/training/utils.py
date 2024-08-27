@@ -1,6 +1,8 @@
 from tqdm import tqdm
 import jax
 import jax.experimental.host_callback as hcb
+from jax.experimental import io_callback
+import jax.numpy as jnp
 
 def progress_bar_scan(num_samples, message=None):
     "Progress bar for a JAX scan"
@@ -11,46 +13,50 @@ def progress_bar_scan(num_samples, message=None):
     print_rate = 5
     remainder = num_samples % print_rate
 
-    def _define_tqdm(arg, transform):
+    def _define_tqdm(arg):
         tqdm_bars[0] = tqdm(range(num_samples))
         tqdm_bars[0].set_description(message, refresh=False)
+        return jnp.zeros((),dtype=bool)
 
-    def _update_tqdm(arg, transform):
+    def _update_tqdm(arg):
         tqdm_bars[0].update(arg)
+        return jnp.zeros((),dtype=bool)
 
     def _update_progress_bar(iter_num):
         "Updates tqdm progress bar of a JAX scan or loop"
         _ = jax.lax.cond(
             iter_num == 0,
-            lambda _: hcb.id_tap(_define_tqdm, None, result=iter_num),
-            lambda _: iter_num,
+            lambda _: io_callback(_define_tqdm, jax.ShapeDtypeStruct((),bool), None),
+            lambda _: jnp.zeros((),dtype=bool),
             operand=None,
         )
         _ = jax.lax.cond(
             # update tqdm every multiple of `print_rate` except at the end
             (iter_num % print_rate == 0) & (iter_num != num_samples-remainder),
-            lambda _: hcb.id_tap(_update_tqdm, print_rate, result=iter_num),
-            lambda _: iter_num,
+            lambda _: io_callback(_update_tqdm, jax.ShapeDtypeStruct((),bool), print_rate),
+            lambda _: jnp.zeros((),dtype=bool),
             operand=None,
         )
         _ = jax.lax.cond(
             # update tqdm by `remainder`
             iter_num == num_samples-remainder,
-            lambda _: hcb.id_tap(_update_tqdm, remainder, result=iter_num),
-            lambda _: iter_num,
+            lambda _: io_callback(_update_tqdm, jax.ShapeDtypeStruct((),bool), remainder),
+            lambda _: jnp.zeros((),dtype=bool),
             operand=None,
         )
 
-    def _close_tqdm(arg, transform):
+    def _close_tqdm(arg):
         tqdm_bars[0].close()
+        return jnp.zeros((),dtype=bool)
 
     def close_tqdm(result, iter_num):
-        return jax.lax.cond(
+        _ = jax.lax.cond(
             iter_num == num_samples-1,
-            lambda _: hcb.id_tap(_close_tqdm, None, result=result),
-            lambda _: result,
+            lambda _: io_callback(_close_tqdm, jax.ShapeDtypeStruct((),bool), None),
+            lambda _: jnp.zeros((),dtype=bool),
             operand=None,
         )
+        return result
 
     def _progress_bar_scan(func):
         """Decorator that adds a progress bar to `body_fun` used in `lax.scan`.
@@ -65,7 +71,8 @@ def progress_bar_scan(num_samples, message=None):
                 iter_num = x   
             _update_progress_bar(iter_num)
             result = func(carry, x)
-            return close_tqdm(result, iter_num)
+            _ = close_tqdm(result, iter_num)
+            return result
 
         return wrapper_progress_bar
 

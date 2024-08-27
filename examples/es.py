@@ -22,7 +22,7 @@ logger = rx.Logger(True, rx.logging.default_es_metrics)
 
 # 3. Run es
 wandb.init(project="example", config=dict())
-evolved_prms, _, data = rx.evolve(prms, rastrigin, jr.key(1), steps=32, logger=logger) #type:ignore
+evolved_prms, _, data = rx.evolve(prms, rastrigin, jr.key(1), steps=32, logger=logger, progress_bar=False) #type:ignore
 wandb.finish()
 
 # 3. Plot data
