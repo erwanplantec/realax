@@ -161,7 +161,7 @@ class Logger:
 			Returns:
 			    TYPE: Description
 			"""
-			io_callback(lambda d, e : save(d, e), data, epoch)
+			io_callback(lambda d, e : save(d, e), jax.ShapeDtypeStruct((),bool), data, epoch)
 			return None
 
 		if self.ckpt_file is not None:
