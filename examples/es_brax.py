@@ -21,7 +21,7 @@ mdl_factory = lambda prms: eqx.combine(prms, statics)
 
 task = rx.BraxTask(env_name, 500, mdl_factory)
 
-logger = rx.Logger(wandb_log=True, metrics_fn=rx.training.log.default_es_metrics, 
+logger = rx.Logger(wandb_log=True, metrics_fn=rx.logging.default_es_metrics, 
 	ckpt_file="../ckpts_ex/es", ckpt_freq=50)
 
 config = {

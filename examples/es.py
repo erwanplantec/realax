@@ -4,6 +4,7 @@ import jax.numpy as jnp
 import jax.random as jr
 import matplotlib.pyplot as plt
 import numpy as np
+import wandb
 
 # 1. define your fitness function
 def rastrigin(x, key=None, data=None):
@@ -17,8 +18,12 @@ def rastrigin(x, key=None, data=None):
 dims = 2
 prms = jnp.zeros((dims,))
 
+logger = rx.Logger(True, rx.logging.default_es_metrics)
+
 # 3. Run es
-evolved_prms, _, data = rx.evolve(prms, rastrigin, jr.key(1), steps=32) #type:ignore
+wandb.init(project="example", config=dict())
+evolved_prms, _, data = rx.evolve(prms, rastrigin, jr.key(1), steps=32, logger=logger) #type:ignore
+wandb.finish()
 
 # 3. Plot data
 fitnesses = data["metrics"]["fitness"]

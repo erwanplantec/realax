@@ -7,7 +7,7 @@ from jaxtyping import PyTree
 from typing import Tuple, TypeAlias, Callable, Optional
 import equinox as eqx
 import os
-from jax.experimental import host_callback as hcb
+from jax.experimental import io_callback
 
 TrainState: TypeAlias = PyTree[...]
 Data: TypeAlias = PyTree[...]
@@ -122,9 +122,11 @@ class Logger:
 		Args:
 		    data (dict): Description
 		"""
-		hcb.id_tap(
-			lambda d, *_: wandb.log(self.host_log_transform(d)), data
-		)
+		def clbck(data, *_):
+			wandb.log(self.host_log_transform(data))
+			return jnp.zeros((),dtype=bool)
+
+		_ = io_callback(clbck, jax.ShapeDtypeStruct((),bool), data)
 
 	#-------------------------------------------------------------------
 
