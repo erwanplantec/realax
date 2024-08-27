@@ -102,10 +102,10 @@ class GymnaxTask(eqx.Module):
 			self.env.default_params.max_steps_in_episode,
 		)
 		# Return the sum of rewards accumulated by agent in episode rollout
-		policy_state, obs, action, reward, _, _ = scan_out
+		policy_state, obs, action, reward, _, info = scan_out
 		cum_return = carry_out[-2][0]
 		data = {"policy_states": policy_state, "obs": obs, 
-				"action": action, "rewards": reward}
+				"action": action, "rewards": reward, **dict(info)}
 		data = self.data_fn(data)
 		return cum_return, data
 

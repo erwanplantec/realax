@@ -2,7 +2,15 @@ from .training import (
 	evolve, 
 	optimize, 
 	EvosaxTrainer, 
-	OptaxTrainer, 
-	QDTrainer)
+	OptaxTrainer)
+try:
+	from .training import QDTrainer
+except:
+	pass
 from .logging import Logger
-from .tasks import GymnaxTask, BraxTask
+
+try: from .tasks import GymnaxTask
+except: pass
+
+try: from .tasks import BraxTask
+except: pass

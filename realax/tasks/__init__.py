@@ -1,5 +1,11 @@
-from .brax_wrapper import BraxTask
-from .gymnax_wrapper import GymnaxTask
+try:
+	from .brax_wrapper import BraxTask
+except:
+	pass
+try:
+	from .gymnax_wrapper import GymnaxTask
+except:
+	pass
 from .rl_policy import BasePolicy
 
 ENV_SPACES = {
