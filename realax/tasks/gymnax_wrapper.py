@@ -105,7 +105,7 @@ class GymnaxTask(eqx.Module):
 		policy_state, obs, action, reward, _, info = scan_out
 		cum_return = carry_out[-2][0]
 		data = {"policy_states": policy_state, "obs": obs, 
-				"action": action, "rewards": reward, **dict(info)}
+				"action": action, "rewards": reward}
 		data = self.data_fn(data)
 		return cum_return, data
 
