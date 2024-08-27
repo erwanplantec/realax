@@ -149,6 +149,7 @@ class Logger:
 			if self.verbose:
 				print("saving data at: ", file)
 			eqx.tree_serialise_leaves(file, data)
+			return jnp.zeros((),dtype=bool)
 
 		def tap_save(data, epoch):
 			"""Summary
@@ -160,7 +161,7 @@ class Logger:
 			Returns:
 			    TYPE: Description
 			"""
-			hcb.id_tap(lambda de, _: save(de[0], de[1]), [data,epoch])
+			io_callback(lambda d, e : save(d, e), data, epoch)
 			return None
 
 		if self.ckpt_file is not None:
