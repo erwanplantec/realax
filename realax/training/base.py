@@ -18,12 +18,7 @@ from jaxtyping import PyTree
 Data: TypeAlias = PyTree[...]
 TrainState: TypeAlias = PyTree[...]
 
-class BaseTrainer(eqx.Module):
-	#-------------------------------------------------------------------
-	train_steps: int
-	logger: Optional[Logger]
-	progress_bar: Optional[bool]
-	#-------------------------------------------------------------------
+class BaseTrainer:
 
 	def __init__(self, 
 				 train_steps: int, 

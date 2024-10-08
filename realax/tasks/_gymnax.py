@@ -110,3 +110,27 @@ class GymnaxTask(eqx.Module):
 		return cum_return, data
 
 	#-------------------------------------------------------------------
+
+	def step(self, *args, **kwargs):
+		"""Summary
+		
+		Args:
+		    *args: Description
+		    **kwargs: Description
+		
+		Returns:
+		    TYPE: Description
+		"""
+		return self.env.step(*args, **kwargs)
+
+	def reset(self, *args, **kwargs):
+		"""Summary
+		
+		Args:
+		    *args: Description
+		    **kwargs: Description
+		
+		Returns:
+		    TYPE: Description
+		"""
+		return self.env.reset(*args, **kwargs)
