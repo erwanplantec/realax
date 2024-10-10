@@ -133,18 +133,6 @@ class BaseTrainer:
 
 	#-------------------------------------------------------------------
 
-	def log(self, data):
-		"""Summary
-		
-		Args:
-		    data (TYPE): Description
-		"""
-		hcb.id_tap(
-			lambda d, *_: wandb.log(d), data
-		)
-
-	#-------------------------------------------------------------------
-
 	def init_and_train(self, key: jax.Array, data: Optional[Data]=None)->Tuple[TrainState, Data]:
 		"""Summary
 		

@@ -12,4 +12,4 @@ prms, sttcs = eqx.partition(mdl, eqx.is_array)
 fctry = lambda prms: eqx.combine(prms, sttcs)
 
 ppo_cfg = rx.PPOConfig(env_name=env)
-ppo = rx.PPO(fctry, ppo_cfg)
+ppo = rx.PPO(fctry, ppo_cfg, params_init=lambda k: prms)

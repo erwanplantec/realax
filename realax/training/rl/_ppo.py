@@ -1,8 +1,8 @@
 #-------------------------------------------------------------------
 from ...tasks._gymnax import GymnaxTask
 from ...tasks._brax import BraxTask
+from ..base import BaseTrainer
 
-from typing import NamedTuple, Callable, Union, Optional, Tuple
 from gymnax.environments.environment import Environment
 import jax
 import jax.nn as jnn
@@ -10,7 +10,6 @@ import jax.numpy as jnp
 import jax.random as jr
 import equinox as eqx
 import equinox.nn as nn
-from jaxtyping import PyTree
 import optax
 import gymnax as gx
 import matplotlib.pyplot as plt
@@ -18,6 +17,10 @@ from functools import partial
 import chex
 import distrax
 from equinox import filter_jit as jit, filter_vmap as vmap
+#-------------------------------------------------------------------
+from jaxtyping import PyTree
+from typing import NamedTuple, Callable, TypeAlias, Union, Optional, Tuple, Any
+Data: TypeAlias=PyTree
 #-------------------------------------------------------------------
 
 
@@ -127,14 +130,12 @@ class TrainState(NamedTuple):
     step: int
 
 
-class PPO:
+class PPO(BaseTrainer):
     #-------------------------------------------------------------------
-    def __init__(self, mdl_factory: Callable, env: Environment, config: Config) -> None:
-        # ---
-        #assert cfg.num_envs%cfg.num_minibatches==0
-        # ---
+    def __init__(self, mdl_factory: Callable, env: Environment, config: Config, params_init: Callable) -> None:
         self.cfg = config
         self.mdl_fctry = mdl_factory
+        self.params_init = params_init
         self.env = LogWrapper(env)
         if config.anneal_lr:
             def linear_schedule(count):
@@ -155,6 +156,9 @@ class PPO:
             )
         self.tx = tx
         self.eval_fn = GymnaxTask(env, lambda prms: EvalWrapper(mdl_factory(prms)))
+    #-------------------------------------------------------------------
+    def train_step(self, state: TrainState, key: jax.Array, data: Optional[Data] = None) -> Tuple[TrainState, Any]:
+        return self.update_step(state, key)
     #-------------------------------------------------------------------
     @eqx.filter_jit
     def collect_trajectory(self, model, key, start_state):
@@ -195,7 +199,7 @@ class PPO:
             trajs, reverse=True, unroll=16)
         return advantages, advantages + trajs.value
     #-------------------------------------------------------------------
-    def update_step(self, train_state: TrainState, key):
+    def update_step(self, train_state: TrainState, key)->Tuple[TrainState, PyTree]:
         mdl = self.mdl_fctry(train_state.params)
         # 1. Collect trajectories
         key, _key = jr.split(key)
@@ -217,8 +221,9 @@ class PPO:
         eval_score, _ = vmap(self.eval_fn, in_axes=(None,0))(train_state.params, jr.split(_key, 8))
         eval_score = jnp.mean(eval_score)
 
-        return (train_state._replace(obs=last_obs, env_states=last_env_states, dones=last_dones),
-            [losses,eval_score]
+        return (
+            train_state._replace(obs=last_obs, env_states=last_env_states, dones=last_dones),
+            dict(loss=losses, eval=eval_score)
         )
     #-------------------------------------------------------------------
     def _update_epoch(self, state, key):
@@ -279,18 +284,12 @@ class PPO:
         train_state = self.apply_gradients(train_state, grads)
 
         return train_state, all_loss
-    #-------------------------------------------------------------------s
-    @eqx.filter_jit
-    def train(self, params, key):
-        key_init, key_train = jr.split(key)
-        rs = self.init_train_state(params, key_init)
-        train_keys = jr.split(key_train, self.cfg.num_updates)
-        rs, [losses, eval_scores] = jax.lax.scan(self.update_step, rs, train_keys)
-        return rs, [losses, eval_scores]
     #-------------------------------------------------------------------
-    def init_train_state(self, params, key)->TrainState:
+    def initialize(self, key)->TrainState:
+        key_prms, key_env = jr.split(key)
+        params = self.params_init(key_prms)
         opt_state = self.tx.init(params)
-        obs, env_state = vmap(self.env.reset)(jr.split(key, self.cfg.num_envs))
+        obs, env_state = vmap(self.env.reset)(jr.split(key_env, self.cfg.num_envs))
         return TrainState(
             params=params, 
             opt_state=opt_state, 

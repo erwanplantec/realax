@@ -7,7 +7,7 @@ try:
 except:
 	pass
 
-def make_task(env: str, *args, **kwargs):
+def make_env(env: str, *args, **kwargs):
 	"""Make a task given by env name
 	
 	Args:
@@ -34,6 +34,7 @@ ENV_SPACES = {
 	"CartPole-v1": (4, 2, True),
 	"Acrobot-v1": (6, 3, True),
 	"MountainCar-v0": (2, 3, True),
+	"MountainCarConitnuous-v0": (2, 1, False),
 	"halfcheetah": (17, 6, False),
 	"ant": (27, 8, False),
 	"walker2d": (17, 6, False),
@@ -46,3 +47,12 @@ ENV_SPACES = {
 	"Reacher-misc": (8, 2, False),
 	"reacher": (11, 2, False)
 }
+
+def get_env_dimensions(env: str):
+	if env.startswith("Synthetic-"):
+		env = env.replace("Synthetic-", "")
+	dims = ENV_SPACES.get(env, None)
+	if dims is None:
+		env = make_env(env).env
+		#TODO
+	return dims
