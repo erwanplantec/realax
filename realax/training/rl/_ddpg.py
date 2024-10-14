@@ -42,20 +42,6 @@ class Critic(eqx.Module):
 	def __call__(self, obs, action):
 		return self.mlp(jnp.concatenate([obs, action]))
 
-class Config(NamedTuple):
-	env: str="Pendulum-v1"
-	n_envs: int=8
-	n_steps: int=4
-	train_steps: int=1_000_000
-	warmup_steps: int=1_000
-	lr_actor: float=1e-4
-	lr_critic: float=1e-3
-	gamma: float=0.99
-	tau: float=0.001
-	replay_buffer_size: int=100_000
-	batch_size: int=64
-	max_grad_norm: float=0.5
-
 class ReplayBuffer(NamedTuple):
 	# ---
 	max_size: int
@@ -78,8 +64,21 @@ class ReplayBuffer(NamedTuple):
 			rewards = self.rewards.at[ids].set(rewards),
 			dones = self.dones.at[ids].set(dones),
 			counter = self.counter+n)
-	
 
+class Config(NamedTuple):
+	env: str="Pendulum-v1"
+	n_envs: int=8
+	n_steps: int=4
+	train_steps: int=1_000_000
+	warmup_steps: int=1_000
+	lr_actor: float=1e-4
+	lr_critic: float=1e-3
+	gamma: float=0.99
+	tau: float=0.001
+	replay_buffer_size: int=100_000
+	batch_size: int=64
+	max_grad_norm: float=0.5
+	
 
 class TrainState(NamedTuple):
 	# ---
@@ -96,7 +95,7 @@ class TrainState(NamedTuple):
 	# ---
 
 
-class DDPG:
+class DDPG(BaseTrainer):
 	
 	#-------------------------------------------------------------------
 	
@@ -121,7 +120,7 @@ class DDPG:
 	
 	#-------------------------------------------------------------------
 	
-	def initialize(self, actor_prms: PyTree, critic_prms: PyTree, key: jax.Array):
+	def initialize(self, key: jax.Array):
 
 		key_rst, key_wrmp = jr.split(key)
 		obs_dims, action_dims, action_type = rx.tasks.ENV_SPACES[self.cfg.env]
@@ -156,26 +155,11 @@ class DDPG:
 	
 	#-------------------------------------------------------------------
 	
-	def train(self, train_state, key):
-		keys = jr.split(key, self.cfg.train_steps)
-		train_state, data = jax.lax.scan(self.train_step, train_state, keys)
-		return train_state, data
-	
-	#-------------------------------------------------------------------
-	
-	@jit
-	def init_and_train(self, actor_prms: PyTree, critic_prms: PyTree, key: jax.Array):
-		key_init, key_train = jr.split(key)
-		train_state = self.initialize(actor_prms, critic_prms, key_init)
-		return self.train(train_state, key_train)
-	
-	#-------------------------------------------------------------------
-	
-	def train_step(self, train_state, key):
+	def train_step(self, state, key, data=None):
 		# 1. Do steps in env
 		key, _key = jr.split(key)
 		train_state, transitions = jax.lax.scan(
-			partial(self.env_step, warmup=False), train_state, jr.split(_key, self.cfg.n_steps)	
+			partial(self.env_step, warmup=False), state, jr.split(_key, self.cfg.n_steps)	
 		)
 		replay_buffer = train_state.replay_buffer.add(transitions)
 		# 2. Sample_batch
@@ -293,32 +277,3 @@ class DDPG:
 		obs, env_state = self.env.reset(key_rst, self.env_prms)
 		_, rewards = jax.lax.scan(env_step, [obs, env_state, jnp.array(False), jnp.array(1.), key], None, 200)
 		return rewards.sum()
-
-
-
-if __name__ == '__main__':
-
-	cfg = Config(train_steps=100_000, n_steps=8)
-
-	do, da, _ = rx.tasks.ENV_SPACES[cfg.env]
-
-	actor = Actor(do, da, key=jr.key(1))
-	actor_prms, actor_sttcs = eqx.partition(actor, eqx.is_array)
-	actor_factory = lambda prms: eqx.combine(prms, actor_sttcs)
-	critic = Critic(do, da, key=jr.key(2))
-	critic_prms, critic_sttcs = eqx.partition(critic, eqx.is_array)
-	critic_factory = lambda prms: eqx.combine(prms, critic_sttcs)
-
-
-	trainer = DDPG(cfg, actor_factory, critic_factory)
-
-	ts = trainer.initialize(actor_prms, critic_prms, jr.key(1))
-
-	ts, losses = trainer.train(ts, jr.key(4))
-
-	fig, ax = plt.subplots(1,3)
-	ax[0].plot(losses["actor_loss"])
-	ax[1].plot(losses["critic_loss"])
-	ax[2].plot(losses["eval_score"])
-	plt.show()
-
