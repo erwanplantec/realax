@@ -7,8 +7,8 @@ Deleted Attributes:
     TaskParams (TYPE): Description
     TrainState (TYPE): Description
 """
-from ..logging import Logger
-from .base import BaseTrainer
+from ...logging import Logger
+from ..base import BaseTrainer
 
 import jax
 import jax.numpy as jnp
@@ -249,7 +249,7 @@ def evolve(
 	fitness_fn: Callable, 
 	key: jax.Array, 
 	popsize: int=64, 
-	strategy:Union[ex.Strategy, str] ="DES", 
+	strategy:Union[ex.Strategy, str] ="OpenES", 
 	steps: int=1024, 
 	use_scan: bool=True, 
 	**kwargs)->Tuple[Params,ex.EvoState,Data]|Tuple[Params,ex.EvoState]:
@@ -268,8 +268,8 @@ def evolve(
 	Returns:
 	    Tuple[Params, ex.EvoState, Data] | Tuple[Params, ex.EvoState]
 	"""
-	ps = ex.ParameterReshaper(prms)
-	es = EvosaxTrainer(steps, strategy, fitness_fn, params_shaper=ps, popsize=popsize, **kwargs)
+	ps = ex.ParameterReshaper(prms, verbose=False)
+	es = EvosaxTrainer(steps, strategy, fitness_fn, params_like=prms, popsize=popsize, **kwargs)
 	if use_scan:
 		state, data = es.init_and_train(key)
 		evolved_prms = ps.reshape_single(state.mean)

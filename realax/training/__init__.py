@@ -1,5 +1,6 @@
 from warnings import warn
-from .es import EvosaxTrainer, evolve
+from .evo import *
+from .rl import *
 from .grad import OptaxTrainer, optimize
 try:
 	from .qd import QDTrainer

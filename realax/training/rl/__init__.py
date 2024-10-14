@@ -5,3 +5,5 @@ algos_and_configs = {
 	"PPO": (PPO, PPOConfig),
 	"DDPG": (DDPG, DDPGConfig)
 }
+
+__all__ = []
