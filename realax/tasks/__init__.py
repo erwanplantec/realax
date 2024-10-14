@@ -34,7 +34,7 @@ ENV_SPACES = {
 	"CartPole-v1": (4, 2, True),
 	"Acrobot-v1": (6, 3, True),
 	"MountainCar-v0": (2, 3, True),
-	"MountainCarConitnuous-v0": (2, 1, False),
+	"MountainCarContinuous-v0": (2, 1, False),
 	"halfcheetah": (17, 6, False),
 	"ant": (27, 8, False),
 	"walker2d": (17, 6, False),
