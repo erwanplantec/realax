@@ -9,6 +9,6 @@ class MultiTaskAggregator:
         for i, task in enumerate(self.tasks):
             f, d = task(params, key, data)
             total_f += f
-            eval_data[f"tsk_{i}"] = d
+            eval_data[f"tsk_{i}_fitness"] = f
+            eval_data[f"tsk_{i}_data"] = d
         return total_f, eval_data
-    #-------------------------------------------------------------------

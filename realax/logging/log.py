@@ -25,6 +25,7 @@ def default_es_metrics(state, data):
 	gen = state.gen_counter
 	f = data["fitness"]
 	log_data = dict(
+		fitness=data["fitness"],
 		avg_fitness=f.mean(),
 		min_fitness=f.min(),
 		max_fitness=f.max()

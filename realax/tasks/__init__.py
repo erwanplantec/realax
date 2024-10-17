@@ -6,6 +6,7 @@ try:
 	from ._gymnax import GymnaxTask
 except:
 	pass
+from .utils import MultiTaskAggregator
 
 def make_env(env: str, *args, **kwargs):
 	"""Make a task given by env name
