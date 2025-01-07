@@ -46,7 +46,8 @@ ENV_SPACES = {
 	"PointRobot-misc": (6, 2, False),
 	"MetaMaze-misc": (15, 4, True),
 	"Reacher-misc": (8, 2, False),
-	"reacher": (11, 2, False)
+	"reacher": (11, 2, False),
+	"FourRooms-misc": (4, 4, True)
 }
 
 def get_env_dimensions(env: str):

@@ -157,9 +157,6 @@ class PPO(BaseTrainer):
         self.tx = tx
         self.eval_fn = GymnaxTask(env, lambda prms: EvalWrapper(mdl_factory(prms)))
     #-------------------------------------------------------------------
-    def train_step(self, state: TrainState, key: jax.Array, data: Optional[Data] = None) -> Tuple[TrainState, Any]:
-        return self.update_step(state, key)
-    #-------------------------------------------------------------------
     @eqx.filter_jit
     def collect_trajectory(self, model, key, start_state):
 
@@ -199,13 +196,13 @@ class PPO(BaseTrainer):
             trajs, reverse=True, unroll=16)
         return advantages, advantages + trajs.value
     #-------------------------------------------------------------------
-    def update_step(self, train_state: TrainState, key)->Tuple[TrainState, PyTree]:
-        mdl = self.mdl_fctry(train_state.params)
+    def train_step(self, state: TrainState, key: jax.Array, data: Data|None=None)->Tuple[TrainState, PyTree]:
+        mdl = self.mdl_fctry(state.params)
         # 1. Collect trajectories
         key, _key = jr.split(key)
         keys = jr.split(_key, self.cfg.num_envs)
         states, transitions = vmap(self.collect_trajectory, in_axes=(None,0, 0))(
-            mdl, keys, [train_state.env_states, train_state.obs, train_state.dones]
+            mdl, keys, [state.env_states, state.obs, state.dones]
         ) #(n_envs, n_steps, ...)
         last_obs, last_env_states, last_dones,  _ = states 
         # 2. Compute advantages
@@ -214,15 +211,15 @@ class PPO(BaseTrainer):
         advantages, targets = vmap(self.compute_gae)(transitions, last_vals, last_dones)
         # 3. Update network
         key, _key = jr.split(key)
-        update_state = (train_state, transitions, advantages, targets)
-        train_state, losses = self._update_epoch(update_state, _key)
+        update_state = (state, transitions, advantages, targets)
+        state, losses = self._update_epoch(update_state, _key)
         # 4. Evaluate
         key, _key = jr.split(key)
-        eval_score, _ = vmap(self.eval_fn, in_axes=(None,0))(train_state.params, jr.split(_key, 8))
+        eval_score, _ = vmap(self.eval_fn, in_axes=(None,0))(state.params, jr.split(_key, 8))
         eval_score = jnp.mean(eval_score)
 
         return (
-            train_state._replace(obs=last_obs, env_states=last_env_states, dones=last_dones),
+            state._replace(obs=last_obs, env_states=last_env_states, dones=last_dones),
             dict(loss=losses, eval=eval_score)
         )
     #-------------------------------------------------------------------

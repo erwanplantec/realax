@@ -58,7 +58,7 @@ class EvosaxTrainer(BaseTrainer):
 		params_like: Optional[Params]=None,
 		params_shaper: Optional[ex.ParameterReshaper]=None,
 		popsize: Optional[int]=None,
-		fitness_shaper: Optional[ex.FitnessShaper]=None,
+		fitness_shaper: Optional[ex.FitnessShaper]=ex.FitnessShaper(maximize=True),
 		es_kws: Optional[Dict[str, Any]]={},
 		es_params: Optional[ex.EvoParams]=None,
 		eval_reps: int=1,

@@ -35,7 +35,6 @@ emitters = {
 }
 
 class QDState(NamedTuple):
-
 	"""Summary
 	"""
 	repertoire: MapElitesRepertoire
@@ -54,7 +53,6 @@ class QDTrainer(BaseTrainer):
 	    params_shaper (TYPE): Description
 	    task (TYPE): Description
 	"""
-	
 	#-------------------------------------------------------------------
 	emitter: Emitter
 	task : QDTask
@@ -62,6 +60,7 @@ class QDTrainer(BaseTrainer):
 	params_shaper: ex.ParameterReshaper
 	n_devices: int
 	fitness_shaper: ex.FitnessShaper
+	sigma_init: float
 	#-------------------------------------------------------------------
 
 	def __init__(
@@ -79,6 +78,7 @@ class QDTrainer(BaseTrainer):
 		eval_reps: int=1,
 		logger: Optional[Logger] = None, 
 		progress_bar: Optional[bool] = False,
+		sigma_init: float=0.1,
 		n_devices: int=1):
 		"""Summary
 		
@@ -122,6 +122,7 @@ class QDTrainer(BaseTrainer):
 			self.task = task
 		self.n_devices = n_devices
 		self.fitness_shaper = fitness_shaper
+		self.sigma_init = sigma_init
 
 	#-------------------------------------------------------------------
 
@@ -137,7 +138,7 @@ class QDTrainer(BaseTrainer):
 		    Tuple[QDState, Data]: Description
 		"""
 		kemit, keval = jr.split(key, 2)
-		x, _ = self.emitter.emit(state.repertoire, state.emitter_state, kemit)
+		x, *_ = self.emitter.emit(state.repertoire, state.emitter_state, kemit)
 		fitness, bd, eval_data = self.eval(x, keval, data) 
 		f = self.fitness_shaper.apply(x, fitness)
 		repertoire = state.repertoire.add(
@@ -167,10 +168,10 @@ class QDTrainer(BaseTrainer):
 		"""
 		kemit, krep, keval = jr.split(key,3)
 		#init_genotypes = jnp.zeros((self.emitter.batch_size,self.params_shaper.total_params))
-		init_genotypes = jr.normal(krep, (self.emitter.batch_size,self.params_shaper.total_params))
+		init_genotypes = jr.normal(krep, (self.emitter.batch_size,self.params_shaper.total_params)) * self.sigma_init
 		fit, bd, eval_data = self.eval(init_genotypes, keval, None)
-		emitter_state, _ = self.emitter.init(None, kemit)
 		repertoire = MapElitesRepertoire.init(init_genotypes, fit, bd, self.centroids)
+		emitter_state, _ = self.emitter.init(kemit, repertoire, init_genotypes, fit, bd, None)
 		return QDState(repertoire=repertoire, emitter_state=emitter_state)
 
 	#-------------------------------------------------------------------
