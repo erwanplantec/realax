@@ -18,10 +18,8 @@ BraxEnv: TypeAlias = Env
 
 
 class State(NamedTuple):
-
 	"""Summary
 	"""
-	
 	env_state: EnvState
 	policy_state: PolicyState
 
@@ -33,11 +31,10 @@ class BraxTask(eqx.Module):
 	max_steps: int
 	data_fn: Callable[[PyTree], dict]
 	#-------------------------------------------------------------------
-
 	def __init__(
 		self, 
 		env: Union[str, BraxEnv],
-		max_steps: int,
+		max_steps: int=100,
 		model_factory: Callable=lambda params: params,
 		backend: str="positional",
 		data_fn: Callable=lambda x: x, 

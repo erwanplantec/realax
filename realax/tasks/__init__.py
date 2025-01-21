@@ -6,9 +6,13 @@ try:
 	from ._gymnax import GymnaxTask
 except:
 	pass
+try:
+	from _kheperax import KheperaxTask
+except:
+	pass
 from .utils import MultiTaskAggregator
 
-def make_env(env: str, *args, **kwargs):
+def make(env: str, *args, **kwargs):
 	"""Make a task given by env name
 	
 	Args:
@@ -22,13 +26,21 @@ def make_env(env: str, *args, **kwargs):
 	Raises:
 	    ValueError: Description
 	"""
-	for fctry in [BraxTask, GymnaxTask]: #type:ignore
-		try:
-			task = fctry(env, *args, **kwargs) 
-			return task
-		except:
-			continue
-	raise ValueError(f"environment {env} could not be created")
+	try :
+		tsk = BraxTask(env, *args, **kwargs) #type:ignore
+	except:
+		pass
+
+	try:
+		tsk = GymnaxTask(env, *args, **kwargs) #type:ignore
+	except:
+		pass
+
+	try: 
+		tsk = KheperaxTask(env, *args, **kwargs) #type:ignore
+	except:
+		raise ValueError(f"environment : {env} could not be created")
+	return tsk
 
 
 ENV_SPACES = {
@@ -55,6 +67,7 @@ def get_env_dimensions(env: str):
 		env = env.replace("Synthetic-", "")
 	dims = ENV_SPACES.get(env, None)
 	if dims is None:
-		env = make_env(env).env
+		env = make(env).env
 		#TODO
+		raise NotImplementedError(f"no dimensions given for {env}")
 	return dims
