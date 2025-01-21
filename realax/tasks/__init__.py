@@ -7,8 +7,9 @@ try:
 except:
 	pass
 try:
-	from _kheperax import KheperaxTask
-except:
+	from ._kheperax import KheperaxTask
+except :
+	print("kheperax could not be loaded")
 	pass
 from .utils import MultiTaskAggregator
 
