@@ -142,6 +142,11 @@ class EvosaxTrainer(BaseTrainer):
 
 	#-------------------------------------------------------------------
 
+	def eval_single(self, x: jax.Array, key: jax.Array, data: Data|None=None):
+		return self.task(x, key, data)
+
+	#-------------------------------------------------------------------
+
 	def eval(self, *args, **kwargs):
 		"""Summary
 		
@@ -241,6 +246,34 @@ class EvosaxTrainer(BaseTrainer):
 		return es
 
 	#-------------------------------------------------------------------
+
+	def train__(self, state: TrainState, key: jax.Array, data: Optional[Data] = None, 
+		jit_eval: bool=True, vmap_eval: bool=True, jit_ask: bool=True, jit_tell: bool=True) -> TrainState:
+
+		if vmap_eval: 
+			eval_fn = lambda x, k, d: self.eval(x, k, d)[0]
+		else:
+			def eval_fn(xs, key, data=None):
+				fs = jnp.zeros(xs.shape[0])
+				keys = jr.split(key, xs.shape[0])
+				for i, (x, key) in enumerate(zip(xs, keys)):
+					f, _ = self.eval_single(x, key, data)
+					fs = fs.at[i].set(f)
+				return fs
+
+		eval_fn = jax.jit(eval_fn) if jit_eval else eval_fn
+		ask_fn = jax.jit(self.strategy.ask) if jit_ask else self.strategy.ask
+		tell_fn = jax.jit(self.strategy.tell) if jit_tell else self.strategy.tell
+		
+		for step in range(self.train_steps):
+
+			key, ask_key, eval_key = jr.split(key, 3)
+			x, state = ask_fn(ask_key, state, self.es_params)
+			fitness = self.eval(x, eval_key, data)
+			f = self.fitness_shaper.apply(x, fitness)
+			state = tell_fn(x, f, state, self.es_params)
+
+		return state
 
 
 

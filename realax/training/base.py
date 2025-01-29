@@ -133,6 +133,13 @@ class BaseTrainer:
 
 	#-------------------------------------------------------------------
 
+	def train__(self, state: TrainState, key: jax.Array, data: Optional[Data]=None)->TrainState:
+
+
+		raise NotImplementedError
+
+	#-------------------------------------------------------------------
+
 	def init_and_train(self, key: jax.Array, data: Optional[Data]=None)->Tuple[TrainState, Data]:
 		"""Summary
 		
@@ -162,6 +169,14 @@ class BaseTrainer:
 		init_key, train_key = jr.split(key)
 		state = self.initialize(init_key)
 		return self.train_(state, train_key, data)
+
+	#-------------------------------------------------------------------
+
+	def init_and_train__(self, key: jax.Array, data: Optional[Data]=None)->TrainState:
+
+		init_key, train_key = jr.split(key)
+		state = self.initialize(init_key)
+		return self.train__(state, train_key, data)
 
 	#-------------------------------------------------------------------
 
